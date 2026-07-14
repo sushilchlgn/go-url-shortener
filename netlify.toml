@@ -10,9 +10,11 @@
   status = 200
   force = true
 
-# GET /r/<code> -> the "redirect" Go function, forwarding <code> as a query param
+# GET /r/<code> -> the "redirect" Go function, forwarding <code> as part of the path
+# (passing :splat as a query param to a function is unreliable on Netlify —
+# see https://github.com/netlify/cli/issues/4273 — so we pass it via path instead)
 [[redirects]]
   from = "/r/*"
-  to = "/.netlify/functions/redirect?code=:splat"
+  to = "/.netlify/functions/redirect/:splat"
   status = 200
   force = true

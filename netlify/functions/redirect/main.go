@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -12,9 +13,18 @@ import (
 	"github.com/sushilchlgn/go-url-shortener/internal/store"
 )
 
+// codeFromPath extracts the short code from the request path. Netlify's
+// redirect rewrites "/r/<code>" to "/.netlify/functions/redirect/<code>",
+// so the code is always the final path segment.
+func codeFromPath(path string) string {
+	trimmed := strings.TrimRight(path, "/")
+	parts := strings.Split(trimmed, "/")
+	return parts[len(parts)-1]
+}
+
 func handler(ctx context.Context, req events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
-	code := req.QueryStringParameters["code"]
-	if code == "" {
+	code := codeFromPath(req.Path)
+	if code == "" || code == "redirect" {
 		return &events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
 			Body:       "missing short code",
