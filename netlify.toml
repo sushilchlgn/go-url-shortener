@@ -1,0 +1,18 @@
+[build]
+  command = "chmod +x build.sh && ./build.sh"
+  functions = "functions-build"
+  publish = "public"
+
+# POST /api/shorten -> the "shorten" Go function
+[[redirects]]
+  from = "/api/shorten"
+  to = "/.netlify/functions/shorten"
+  status = 200
+  force = true
+
+# GET /r/<code> -> the "redirect" Go function, forwarding <code> as a query param
+[[redirects]]
+  from = "/r/*"
+  to = "/.netlify/functions/redirect?code=:splat"
+  status = 200
+  force = true

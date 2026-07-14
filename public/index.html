@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>go-url-shortener</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root { color-scheme: dark; }
+  body {
+    background: #0b0d0f;
+    color: #d6f5d6;
+    font-family: "JetBrains Mono", "Fira Code", ui-monospace, Menlo, monospace;
+    max-width: 640px;
+    margin: 4rem auto;
+    padding: 0 1.5rem;
+  }
+  h1 { font-size: 1rem; color: #58e858; margin-bottom: 1.5rem; }
+  h1::before { content: "$ "; color: #3a9d3a; }
+  form { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+  input {
+    flex: 1;
+    background: #14181b;
+    border: 1px solid #2a3a2a;
+    color: #d6f5d6;
+    padding: 0.6rem 0.8rem;
+    font-family: inherit;
+  }
+  button {
+    background: #1f3a1f;
+    border: 1px solid #3a9d3a;
+    color: #58e858;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  button:hover { background: #2a5a2a; }
+  pre {
+    background: #14181b;
+    border: 1px solid #2a3a2a;
+    padding: 1rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    min-height: 3rem;
+  }
+</style>
+</head>
+<body>
+  <h1>go-url-shortener</h1>
+  <form id="form">
+    <input id="url" type="url" placeholder="https://example.com/some/long/path" required />
+    <button type="submit">shorten</button>
+  </form>
+  <pre id="output">// result will appear here</pre>
+
+  <script>
+    const form = document.getElementById("form");
+    const output = document.getElementById("output");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const url = document.getElementById("url").value.trim();
+      output.textContent = "// shortening...";
+      try {
+        const res = await fetch("/api/shorten", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          output.textContent = "// error: " + (data.error || res.statusText);
+          return;
+        }
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        output.textContent = "// request failed: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
